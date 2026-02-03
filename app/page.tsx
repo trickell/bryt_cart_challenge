@@ -7,6 +7,7 @@ export default async function Home() {
   const resp = await client.request(getShop);
   const productsResp = await client.request(getProducts);
   console.log("Products:", productsResp);
+  
   return (
     <Components.NameInputRoot initialValue="world">
       <main className="w-screen h-screen flex flex-col gap-8 justify-center items-center max-w-2xl mx-auto">
@@ -18,9 +19,13 @@ export default async function Home() {
         )}
 
         <div className="grid grid-cols-2 gap-4 w-full">
-          {productsResp.data?.products.edges.map((edge: any) => (
+          {productsResp.data?.products?.edges?.map((edge: any) => (
             <div key={edge.node.id} className="border border-gray-300 p-4 rounded">
               <h3 className="text-xl">{edge.node.title}</h3>
+              <p className="text-lg">${edge.node.priceRange.minVariantPrice.amount}</p>
+              {edge.node.featuredImage && (
+                <img src={edge.node.featuredImage.url} alt={edge.node.featuredImage.altText} className="w-full h-48 object-cover mt-2" />
+              )}
             </div>
           ))}
         </div>

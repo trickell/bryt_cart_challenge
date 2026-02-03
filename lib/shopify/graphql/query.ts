@@ -14,6 +14,16 @@ export const getProducts = `#graphql
         node {
           id
           title
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+        }
+          featuredImage {
+            url
+            altText
+          }
         }
       }
     }
