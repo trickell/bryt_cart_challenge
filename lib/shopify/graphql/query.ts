@@ -6,3 +6,16 @@ export const getShop = `#graphql
     }
   }
 ` as const;
+
+export const getProducts = `#graphql
+  query getProducts {
+    products(first: 10) {
+      edges {
+        node {
+          id
+          title
+        }
+      }
+    }
+  }
+` as const;

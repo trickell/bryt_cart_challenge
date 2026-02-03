@@ -16,4 +16,16 @@ const query = `#graphql
       description
     }
   }
+
+  query getProducts {
+    products(first: 10) {
+      edges {
+        node {
+          id
+          title
+        }
+      }
+    }
+  }
+
 `; 
