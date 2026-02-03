@@ -10,12 +10,38 @@ export interface ShopifyImage {
   height?: number;
 }
 
+export interface ShopifyOption {
+  id: string;
+  name: string;
+  values: string[];
+}
+
+export interface ShopifySelectedOption {
+  name: string;
+  value: string;
+}
+
+export interface ShopifyVariant {
+  id: string;
+  title: string;
+  price: ShopifyMoney;
+  availableForSale: boolean;
+  image?: ShopifyImage;
+  selectedOptions: ShopifySelectedOption[];
+}
+
 export interface ShopifyProductNode {
   id: string;
   title: string;
   handle: string;
   description: string;
   descriptionHtml?: string;
+  options?: ShopifyOption[];
+  variants?: {
+    edges: Array<{
+      node: ShopifyVariant;
+    }>;
+  };
   priceRange?: {
     minVariantPrice: ShopifyMoney;
     maxVariantPrice: ShopifyMoney;
@@ -25,16 +51,7 @@ export interface ShopifyProductNode {
       node: ShopifyImage;
     }>;
   };
-  variants?: {
-    edges: Array<{
-      node: {
-        id: string;
-        title: string;
-        price: ShopifyMoney;
-        availableForSale: boolean;
-      };
-    }>;
-  };
+  featuredImage?: ShopifyImage;
 }
 
 export interface ShopifyProductEdge {

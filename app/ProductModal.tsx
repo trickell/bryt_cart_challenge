@@ -1,11 +1,24 @@
 "use client";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { VariantSelector } from "./VariantSelector";
 
 // Shopify Product - corrected type
 type Product = {
   id: string;
   title: string;
+  options?: Array<{ id: string; name: string; values: string[] }>;
+  variants?: {
+    edges: Array<{
+      node: {
+        id: string;
+        availableForSale: boolean;
+        price: { amount: string; currencyCode: string };
+        image?: { url: string; altText?: string };
+        selectedOptions: Array<{ name: string; value: string }>;
+      };
+    }>;
+  };
   priceRange: {
     minVariantPrice: {
       amount: string;
@@ -23,11 +36,24 @@ type ProductModalProps = {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  children?: ReactNode;
 };
 
 // Product Modal Component
 export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
+    const [selectedVariant, setSelectedVariant] = useState<
+      Product["variants"]["edges"][0]["node"] | null
+    >(null);
+
+    // Set initial variant when product changes
+    useEffect(() => {
+      if (product?.variants?.edges?.[0]?.node) {
+        setSelectedVariant(product.variants.edges[0].node);
+      }
+    }, [product?.id]);
+
+    const displayPrice = selectedVariant?.price || product?.priceRange.minVariantPrice;
+    const displayImage = selectedVariant?.image || product?.featuredImage;
+
     // When open, lock scrolling
     useEffect(() => {
         if (isOpen) {
@@ -58,7 +84,7 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
         return () => {
             window.removeEventListener("keydown", handleEsc);
         };
-    }, [onClose]); // Removed isOpen from dependencies
+    }, [onClose]);
 
     // Don't render if closed
     if (!isOpen || !product) return null;
@@ -69,6 +95,9 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
             onClose();
         }
     };
+
+    const variants = product.variants?.edges?.map((edge) => edge.node) || [];
+    const options = product.options || [];
 
     return (
         <AnimatePresence>
@@ -114,10 +143,11 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                 transition={{ delay: 0.1, duration: 0.4 }}
                                 className="w-full md:w-1/2 bg-gradient-to-br from-gray-100 to-gray-200 relative"
                             >
-                                {product.featuredImage ? (
+                                {displayImage ? (
                                     <img
-                                        src={product.featuredImage.url}
-                                        alt={product.featuredImage.altText || product.title}
+                                        key={displayImage.url}
+                                        src={displayImage.url}
+                                        alt={displayImage.altText || product.title}
                                         className="w-full h-80 md:h-full object-cover"
                                     />
                                 ) : (
@@ -134,7 +164,7 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2, duration: 0.4 }}
-                                className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-between"
+                                className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-between overflow-y-auto max-h-[90vh]"
                             >
                                 <div className="space-y-6">
                                     {/* Product Title */}
@@ -147,6 +177,21 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                         {product.title}
                                     </motion.h2>
                                     
+                                    {/* Variant Selector */}
+                                    {options.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.32, duration: 0.3 }}
+                                        >
+                                            <VariantSelector
+                                                options={options}
+                                                variants={variants}
+                                                onVariantChange={setSelectedVariant}
+                                            />
+                                        </motion.div>
+                                    )}
+                                    
                                     {/* Product Price */}
                                     <motion.div 
                                         initial={{ opacity: 0, y: 10 }}
@@ -157,13 +202,30 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                         <div className="roboto-flex bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl shadow-md">
                                             <div className="text-sm font-medium uppercase tracking-wider opacity-90">Price</div>
                                             <div className="text-3xl md:text-4xl font-bold">
-                                                ${product.priceRange.minVariantPrice.amount}
+                                                ${displayPrice?.amount}
                                             </div>
                                             <div className="text-sm font-medium opacity-90">
-                                                {product.priceRange.minVariantPrice.currencyCode}
+                                                {displayPrice?.currencyCode}
                                             </div>
                                         </div>
                                     </motion.div>
+
+                                    {/* Availability */}
+                                    {selectedVariant && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className={`text-sm font-semibold ${
+                                                selectedVariant.availableForSale
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
+                                            }`}
+                                        >
+                                            {selectedVariant.availableForSale
+                                                ? "In Stock"
+                                                : "Out of Stock"}
+                                        </motion.div>
+                                    )}
 
                                     {/* Product Description */}
                                     <motion.div 
@@ -185,8 +247,15 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                     whileHover={{ scale: 1.02, y: -2 }}
                                     whileTap={{ scale: 0.98 }}
                                     transition={{ delay: 0.45, duration: 0.3 }}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all mt-8"
-                                    onClick={() => alert(`Purchased ${product.title}!`)}
+                                    disabled={selectedVariant && !selectedVariant.availableForSale}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() =>
+                                        alert(
+                                            `Added ${product.title} (${selectedVariant?.selectedOptions
+                                                .map((o) => `${o.name}: ${o.value}`)
+                                                .join(", ")}) to cart!`
+                                        )
+                                    }
                                 >
                                     Add to Cart
                                 </motion.button>
