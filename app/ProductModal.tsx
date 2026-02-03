@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VariantSelector } from "./VariantSelector";
+import { useCart } from "./CartContext";
 
 // Shopify Product - corrected type
 type Product = {
@@ -38,17 +39,22 @@ type ProductModalProps = {
   onClose: () => void;
 };
 
+type ButtonState = "idle" | "loading" | "success";
+
 // Product Modal Component
 export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) => {
+    const { addItem } = useCart();
     const [selectedVariant, setSelectedVariant] = useState<
       Product["variants"]["edges"][0]["node"] | null
     >(null);
+    const [buttonState, setButtonState] = useState<ButtonState>("idle");
 
     // Set initial variant when product changes
     useEffect(() => {
       if (product?.variants?.edges?.[0]?.node) {
         setSelectedVariant(product.variants.edges[0].node);
       }
+      setButtonState("idle");
     }, [product?.id]);
 
     const displayPrice = selectedVariant?.price || product?.priceRange.minVariantPrice;
@@ -98,6 +104,42 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
 
     const variants = product.variants?.edges?.map((edge) => edge.node) || [];
     const options = product.options || [];
+
+    const handleAddToBag = async () => {
+      if (!selectedVariant) return;
+
+      // Start loading state
+      setButtonState("loading");
+
+      // Simulate async request with deterministic delay (800-1200ms)
+      const delay = 800 + Math.random() * 400;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      // Add item to cart
+      addItem({
+        productId: product.id,
+        variantId: selectedVariant.id,
+        productTitle: product.title,
+        price: selectedVariant.price,
+        image: selectedVariant.image || product.featuredImage,
+        selectedOptions: selectedVariant.selectedOptions,
+      });
+
+      // Show success state
+      setButtonState("success");
+
+      // After 1-2 seconds, close modal and reset
+      const resetDelay = 1000 + Math.random() * 1000;
+      await new Promise((resolve) => setTimeout(resolve, resetDelay));
+
+      setButtonState("idle");
+      onClose();
+    };
+
+    const isVariantValid =
+      selectedVariant && selectedVariant.availableForSale;
+    const isButtonDisabled =
+      !isVariantValid || buttonState !== "idle";
 
     return (
         <AnimatePresence>
@@ -244,20 +286,52 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                 <motion.button
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    whileHover={{ scale: 1.02, y: -2 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={!isButtonDisabled ? { scale: 1.02, y: -2 } : {}}
+                                    whileTap={!isButtonDisabled ? { scale: 0.98 } : {}}
                                     transition={{ delay: 0.45, duration: 0.3 }}
-                                    disabled={selectedVariant && !selectedVariant.availableForSale}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    onClick={() =>
-                                        alert(
-                                            `Added ${product.title} (${selectedVariant?.selectedOptions
-                                                .map((o) => `${o.name}: ${o.value}`)
-                                                .join(", ")}) to Bag!`
-                                        )
-                                    }
+                                    disabled={isButtonDisabled}
+                                    className={`w-full px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all mt-8 ${
+                                      buttonState === "success"
+                                        ? "bg-gradient-to-r from-green-600 to-green-700"
+                                        : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    }`}
+                                    onClick={handleAddToBag}
                                 >
-                                    Add to Bag
+                                    <div className="flex items-center justify-center gap-2">
+                                      {buttonState === "loading" && (
+                                        <motion.div
+                                          animate={{ rotate: 360 }}
+                                          transition={{
+                                            duration: 1,
+                                            repeat: Infinity,
+                                            ease: "linear",
+                                          }}
+                                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                        />
+                                      )}
+                                      {buttonState === "success" && (
+                                        <motion.svg
+                                          initial={{ scale: 0 }}
+                                          animate={{ scale: 1 }}
+                                          className="w-5 h-5"
+                                          fill="currentColor"
+                                          viewBox="0 0 20 20"
+                                        >
+                                          <path
+                                            fillRule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clipRule="evenodd"
+                                          />
+                                        </motion.svg>
+                                      )}
+                                      <span className="text-white">
+                                        {buttonState === "loading"
+                                          ? "Adding..."
+                                          : buttonState === "success"
+                                            ? "Added!"
+                                            : "Add to Bag"}
+                                      </span>
+                                    </div>
                                 </motion.button>
                             </motion.div>
                         </div>

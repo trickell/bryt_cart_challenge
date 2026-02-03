@@ -2,6 +2,7 @@ import * as Components from "./components";
 import { client } from "@/lib/shopify/serverClient";
 import { getShop, getProducts } from "@/lib/shopify/graphql/query";
 import { ProductModalContainer } from "./ProductModalContainer";
+import { CartIcon } from "./CartIcon";
 
 export default async function Home() {
   "use cache";
@@ -14,6 +15,11 @@ export default async function Home() {
     <Components.NameInputRoot initialValue="world">
       <ProductModalContainer products={productsResp.data?.products?.edges || []}>
       <main className="w-screen min-h-screen py-12 flex flex-col gap-8 items-center max-w-6xl mx-auto">
+        {/* Header with cart icon */}
+        <div className="w-full flex justify-end mb-4">
+          <CartIcon />
+        </div>
+
         {/* <h1 className="text-6xl">
           Hello <Components.NameDisplay /> and good luck 😄!
         </h1> */}
