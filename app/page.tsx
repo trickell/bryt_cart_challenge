@@ -29,9 +29,9 @@ export default async function Home() {
 
         <div className="grid grid-cols-2 gap-5 w-full">
           {productsResp.data?.products?.edges?.map((edge: any) => (
-            <div key={edge.node.id} className="border border-gray-300 overflow-hidden rounded cursor-pointer hover:shadow-lg hover:box-shadow hover:shadow-slate-900 transition-shadow duration-300" data-product-id={edge.node.id}>
-              <h3 className="text-xl p-4 dm-text-regular bg-slate-900 text-white">{edge.node.title}</h3>
-              <p className="m-4 text-lg roboto-flex">${edge.node.priceRange.minVariantPrice.amount}</p>
+            <div key={edge.node.id} className="bg-gray-800 border border-gray-700 overflow-hidden rounded cursor-pointer hover:shadow-2xl hover:shadow-blue-400/50 transition-shadow duration-300" data-product-id={edge.node.id}>
+              <h3 className="text-xl p-4 dm-text-regular bg-gray-900 text-white">{edge.node.title}</h3>
+              <p className="m-4 text-lg roboto-flex text-gray-300">${edge.node.priceRange.minVariantPrice.amount}</p>
               {edge.node.featuredImage && (
                 <img src={edge.node.featuredImage.url} alt={edge.node.featuredImage.altText} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
               )}
