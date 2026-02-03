@@ -253,11 +253,11 @@ export const ProductModal = ({ product, isOpen, onClose }: ProductModalProps) =>
                                         alert(
                                             `Added ${product.title} (${selectedVariant?.selectedOptions
                                                 .map((o) => `${o.name}: ${o.value}`)
-                                                .join(", ")}) to cart!`
+                                                .join(", ")}) to Bag!`
                                         )
                                     }
                                 >
-                                    Add to Cart
+                                    Add to Bag
                                 </motion.button>
                             </motion.div>
                         </div>
