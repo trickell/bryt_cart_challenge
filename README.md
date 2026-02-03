@@ -1,5 +1,21 @@
 # Bryt Designs Tech Challenge
 
+### Tradeoffs and what I would have done better
+
+First off, thanks for the challenge. I've learned a ton of things about shopify and graphQL that will definitely be implementing the future on my recent projects. 
+
+To start off I had to tradeoff my styling by a lot. I'm using basic tailwind styling in my opinion to get something less exciting. I also wanted to create and work on a .svg animated background which I had to trade off to get functionality working for variants. 
+
+Other things I would have definitely implemented if the time was there. I would have implemented validation and checks when the user removes an item to the cart. There would have been popups confirming the deletion. I would have also added visual cues when something gets added successfully pointing the cart and had the cart implemented better (as a side bar slideout), with better visualization of it. There would also be automated showing of the cart when the user adds a product.
+
+One of the biggest things I wish I could have got around to implementing is pagination for the products and a filter allowing the user to select how many products they can see on screen (10,20,30). I also considered using React Suspend instead of pagination to lazy load the products in as the user scrolled. I prefer pagination most the time when it comes to viewing products.
+
+I would have also created a top filter for the products allowing the user to filter through products by type and price and would have also given a sort option to sort products by most recently added, name, or price. 
+
+These are the things I would have done differently if I had more time with the shop. Sincerely, thanks again for the challenge and all the stuff I've learned (GraphQL) while creating this project.
+
+---
+
 ### Shopify Quick View Modal (Headless UI Feature)
 
 ### Hello fellow candidate! 👋
