@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@shopify/storefront-api-client": "^1.0.9",
+    "framer-motion": "^12.31.0",
     "motion": "^12.26.2",
     "next": "16.1.1",
     "react": "19.2.3",

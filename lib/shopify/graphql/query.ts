@@ -19,7 +19,8 @@ export const getProducts = `#graphql
               amount
               currencyCode
             }
-        }
+         }
+            
           featuredImage {
             url
             altText
